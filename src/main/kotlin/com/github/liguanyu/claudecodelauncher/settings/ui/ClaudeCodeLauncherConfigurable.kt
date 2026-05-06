@@ -14,6 +14,7 @@ import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
+import com.intellij.ui.dsl.builder.AlignX
 import com.intellij.ui.dsl.builder.panel
 import java.awt.Font
 import javax.swing.JComponent
@@ -48,6 +49,8 @@ class ClaudeCodeLauncherConfigurable : SearchableConfigurable {
 
     companion object {
         private val ALLOWED_SAFE_VALUE_REGEX = Regex("^[A-Za-z0-9._-]*$")
+        private const val SHORT_FIELD_COLUMNS = 24
+        private const val LONG_FIELD_COLUMNS = 56
     }
 
     override fun getId(): String = "com.github.liguanyu.claudecodelauncher.settings"
@@ -58,11 +61,13 @@ class ClaudeCodeLauncherConfigurable : SearchableConfigurable {
         modelCombo = ComboBox(Model.entries.toTypedArray(), 180)
         customModelField = JBTextField().apply {
             emptyText.text = "e.g. sonnet"
+            columns = SHORT_FIELD_COLUMNS
             isEnabled = false
         }
         effortCombo = ComboBox(ModelReasoningEffort.entries.toTypedArray(), 160)
         customEffortField = JBTextField().apply {
             emptyText.text = "e.g. high"
+            columns = SHORT_FIELD_COLUMNS
             isEnabled = false
         }
         permissionModeCombo = ComboBox(PermissionMode.entries.toTypedArray(), 200)
@@ -70,22 +75,22 @@ class ClaudeCodeLauncherConfigurable : SearchableConfigurable {
             font = Font(Font.MONOSPACED, Font.PLAIN, 12)
             emptyText.text = "One --add-dir path per line"
         }
-        allowedToolsField = JBTextField().apply { emptyText.text = "e.g. Bash,Edit" }
-        disallowedToolsField = JBTextField().apply { emptyText.text = "e.g. WebFetch" }
-        toolsField = JBTextField().apply { emptyText.text = "Tool list passed to --tools" }
-        mcpConfigPathField = JBTextField().apply { emptyText.text = "Path to MCP config JSON" }
-        settingsPathField = JBTextField().apply { emptyText.text = "Path to Claude settings JSON" }
+        allowedToolsField = longTextField("e.g. Bash,Edit")
+        disallowedToolsField = longTextField("e.g. WebFetch")
+        toolsField = longTextField("Tool list passed to --tools")
+        mcpConfigPathField = longTextField("Path to MCP config JSON")
+        settingsPathField = longTextField("Path to Claude settings JSON")
         customArgsField = JBTextField().apply {
             emptyText.text = "Additional Claude Code arguments"
-            columns = 50
+            columns = LONG_FIELD_COLUMNS
         }
         openFileOnChangeCheckbox = JBCheckBox("Open files automatically when changed")
         enableNotificationCheckbox = JBCheckBox("Enable notifications when Claude Code stops")
         launchShellModeCombo = ComboBox(LaunchShellMode.entries.toTypedArray(), 200)
         powerShellVersionCombo = ComboBox(PowerShellVersion.entries.toTypedArray(), 180)
-        powerShellPathField = JBTextField().apply { emptyText.text = "Optional; defaults to powershell.exe or pwsh.exe" }
-        wslPathField = JBTextField().apply { emptyText.text = "Optional; defaults to wsl.exe" }
-        wslDistroField = JBTextField().apply { emptyText.text = "Optional WSL distro name" }
+        powerShellPathField = longTextField("Optional; defaults to powershell.exe or pwsh.exe")
+        wslPathField = longTextField("Optional; defaults to wsl.exe")
+        wslDistroField = longTextField("Optional WSL distro name")
 
         installSafeValueFilter(customModelField)
         installSafeValueFilter(customEffortField)
@@ -97,27 +102,27 @@ class ClaudeCodeLauncherConfigurable : SearchableConfigurable {
             group("Launch Shell") {
                 row("Shell") { cell(launchShellModeCombo) }
                 row("PowerShell version") { cell(powerShellVersionCombo) }
-                row("PowerShell executable") { cell(powerShellPathField).resizableColumn() }
-                row("WSL executable") { cell(wslPathField).resizableColumn() }
-                row("WSL distro") { cell(wslDistroField).resizableColumn() }
+                row("PowerShell executable") { cell(powerShellPathField).resizableColumn().align(AlignX.FILL) }
+                row("WSL executable") { cell(wslPathField).resizableColumn().align(AlignX.FILL) }
+                row("WSL distro") { cell(wslDistroField).resizableColumn().align(AlignX.FILL) }
             }
             group("Model") {
                 row("Model") { cell(modelCombo) }
-                row("Custom model") { cell(customModelField).resizableColumn() }
+                row("Custom model") { cell(customModelField).resizableColumn().align(AlignX.FILL) }
                 row("Effort") { cell(effortCombo) }
-                row("Custom effort") { cell(customEffortField).resizableColumn() }
+                row("Custom effort") { cell(customEffortField).resizableColumn().align(AlignX.FILL) }
             }
             group("Permissions") {
                 row("Permission mode") { cell(permissionModeCombo) }
             }
             group("Claude Code Arguments") {
-                row("Add dirs") { cell(JBScrollPane(addDirsArea)).resizableColumn() }
-                row("Allowed tools") { cell(allowedToolsField).resizableColumn() }
-                row("Disallowed tools") { cell(disallowedToolsField).resizableColumn() }
-                row("Tools") { cell(toolsField).resizableColumn() }
-                row("MCP config") { cell(mcpConfigPathField).resizableColumn() }
-                row("Settings") { cell(settingsPathField).resizableColumn() }
-                row("Custom args") { cell(customArgsField).resizableColumn() }
+                row("Add dirs") { cell(JBScrollPane(addDirsArea)).resizableColumn().align(AlignX.FILL) }
+                row("Allowed tools") { cell(allowedToolsField).resizableColumn().align(AlignX.FILL) }
+                row("Disallowed tools") { cell(disallowedToolsField).resizableColumn().align(AlignX.FILL) }
+                row("Tools") { cell(toolsField).resizableColumn().align(AlignX.FILL) }
+                row("MCP config") { cell(mcpConfigPathField).resizableColumn().align(AlignX.FILL) }
+                row("Settings") { cell(settingsPathField).resizableColumn().align(AlignX.FILL) }
+                row("Custom args") { cell(customArgsField).resizableColumn().align(AlignX.FILL) }
             }
             group("Hooks") {
                 row { cell(enableNotificationCheckbox) }
@@ -128,6 +133,12 @@ class ClaudeCodeLauncherConfigurable : SearchableConfigurable {
         updateShellFields()
         return root
     }
+
+    private fun longTextField(emptyText: String): JBTextField =
+        JBTextField().apply {
+            this.emptyText.text = emptyText
+            columns = LONG_FIELD_COLUMNS
+        }
 
     override fun isModified(): Boolean {
         val s = settings.state
