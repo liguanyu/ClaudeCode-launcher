@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" role="img" aria-label="ClaudeCode-launcher (active)">
-  <!-- Active placeholder variant -->
-  <rect x="2" y="3" width="20" height="18" rx="3.2" fill="#2cb491" stroke="#355a52" stroke-width="1.8" stroke-linejoin="round"></rect>
-  <!-- "./" hint to imply path insertion -->
-  <circle cx="8" cy="16" r="1.2" fill="#eeeeee" opacity="0.94"></circle>
-  <path d="M17 8 L13 16.5" stroke="#eeeeee" stroke-width="1.8" stroke-linecap="round"></path>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="ClaudeCode-launcher (active)">
+  <rect x="1.3" y="1.5" width="13.4" height="13" rx="2.9" fill="#D97736" stroke="#8A4B2A" stroke-width="1.2"/>
+  <path d="M6 5 3.6 8 6 11" fill="none" stroke="#FFF3E2" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10 5 12.4 8 10 11" fill="none" stroke="#FFF3E2" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M8 3.45 8.72 5.98 11.25 6.7 8.72 7.42 8 9.95 7.28 7.42 4.75 6.7 7.28 5.98 8 3.45Z" fill="#FFF8EA"/>
+  <circle cx="8" cy="12.35" r=".8" fill="#FFF8EA"/>
 </svg>

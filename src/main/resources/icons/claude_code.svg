@@ -1,8 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" role="img" aria-label="ClaudeCode-launcher">
-  <!-- frame: inherits color from parent -->
-  <rect x="2" y="3" width="20" height="18" rx="3.2" fill="none" stroke="#CED0D5" stroke-width="1.8" stroke-linejoin="round"></rect>
-  <!-- "C" stroke: fixed to #2cb491 -->
-  <path d="M11 9.1 A3 3.3 0 1 0 11 15" fill="none" stroke="#2cb491" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
-  <!-- small underscore/prompt: inherits color -->
-  <rect x="13.5" y="14.3" width="4" height="1.6" rx="0.6" fill="#CED0D5"></rect>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" role="img" aria-label="ClaudeCode-launcher">
+  <rect x="1.4" y="1.6" width="13.2" height="12.8" rx="2.8" fill="#FFF3E2" stroke="#C96F32" stroke-width="1.2"/>
+  <path d="M6.2 5 3.8 8l2.4 3" fill="none" stroke="#8A4B2A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M9.8 5 12.2 8l-2.4 3" fill="none" stroke="#8A4B2A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M8 3.7 8.75 6.15 11.2 6.9 8.75 7.65 8 10.1 7.25 7.65 4.8 6.9 7.25 6.15 8 3.7Z" fill="#D97736"/>
 </svg>
