@@ -90,7 +90,7 @@ class ClaudeCodeLauncherConfigurable : SearchableConfigurable {
         powerShellVersionCombo = ComboBox(PowerShellVersion.entries.toTypedArray(), 180)
         powerShellPathField = longTextField("Optional; defaults to powershell.exe or pwsh.exe")
         wslPathField = longTextField("Optional; defaults to wsl.exe")
-        wslDistroField = longTextField("Optional WSL distro name")
+        wslDistroField = longTextField("Defaults to Ubuntu")
 
         installSafeValueFilter(customModelField)
         installSafeValueFilter(customEffortField)

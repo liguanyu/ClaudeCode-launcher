@@ -7,7 +7,6 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Key
-import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.terminal.ui.TerminalWidget
 import com.intellij.ui.content.Content
@@ -22,6 +21,7 @@ class ClaudeCodeTerminalManager(private val project: Project) {
         private val CLAUDE_CODE_TERMINAL_KEY = Key.create<Boolean>("claudecode.launcher.terminal")
         private val CLAUDE_CODE_TERMINAL_RUNNING_KEY = Key.create<Boolean>("claudecode.launcher.terminal.running")
         private val CLAUDE_CODE_TERMINAL_CALLBACK_KEY = Key.create<Boolean>("claudecode.launcher.terminal.callbackRegistered")
+        private val CLAUDE_CODE_TERMINAL_SHELL_KEY = Key.create<String>("claudecode.launcher.terminal.shell")
     }
 
     private val logger = logger<ClaudeCodeTerminalManager>()
@@ -31,18 +31,25 @@ class ClaudeCodeTerminalManager(private val project: Project) {
 
     fun launch(baseDir: String, command: String, state: ClaudeCodeLauncherSettings.State) {
         val terminalManager = TerminalToolWindowManager.getInstance(project)
-        val terminalCommand = ShellLaunchCommandBuilder.wrap(command, baseDir, state)
+        val explicitShellCommand = ShellLaunchCommandBuilder.shellCommand(state)
+        val shellIdentity = ShellLaunchCommandBuilder.shellIdentity(state)
         var existingTerminal = locateClaudeCodeTerminal(terminalManager)
 
         existingTerminal?.let { terminal ->
             ensureTerminationCallback(terminal.widget, terminal.content)
+            if (terminal.content.getUserData(CLAUDE_CODE_TERMINAL_SHELL_KEY) != shellIdentity) {
+                logger.info("Creating a new Claude Code terminal because the configured launch shell changed")
+                clearClaudeCodeMetadata(terminal.content)
+                existingTerminal = null
+                return@let
+            }
             if (isClaudeCodeRunning(terminal)) {
                 logger.info("Focusing active Claude Code terminal")
                 focusClaudeCodeTerminal(terminalManager, terminal)
                 return
             }
 
-            if (reuseClaudeCodeTerminal(terminal, terminalCommand)) {
+            if (reuseClaudeCodeTerminal(terminal, command)) {
                 logger.info("Reused existing Claude Code terminal")
                 focusClaudeCodeTerminal(terminalManager, terminal)
                 return
@@ -54,9 +61,14 @@ class ClaudeCodeTerminalManager(private val project: Project) {
 
         var widget: TerminalWidget? = null
         try {
-            widget = terminalManager.createShellWidget(baseDir, TAB_NAME, true, true)
+            widget = if (explicitShellCommand == null) {
+                terminalManager.createShellWidget(baseDir, TAB_NAME, true, true)
+            } else {
+                terminalManager.createNewSession(baseDir, TAB_NAME, explicitShellCommand, true, true)
+            }
             val content = markClaudeCodeTerminal(terminalManager, widget)
-            if (!sendCommandToTerminal(widget, content, terminalCommand)) {
+            content?.putUserData(CLAUDE_CODE_TERMINAL_SHELL_KEY, shellIdentity)
+            if (!sendCommandToTerminal(widget, content, command)) {
                 throw IllegalStateException("Failed to execute Claude Code command")
             }
             if (content != null) {
@@ -90,14 +102,16 @@ class ClaudeCodeTerminalManager(private val project: Project) {
     }
 
     private fun locateClaudeCodeTerminal(manager: TerminalToolWindowManager): ClaudeCodeTerminal? = try {
-        manager.terminalWidgets.asSequence().mapNotNull { widget ->
+        val terminals = manager.terminalWidgets.asSequence().mapNotNull { widget ->
             val content = manager.getContainer(widget)?.content ?: return@mapNotNull null
             val isClaudeCode = content.getUserData(CLAUDE_CODE_TERMINAL_KEY) == true || content.displayName == TAB_NAME
             if (!isClaudeCode) {
                 return@mapNotNull null
             }
             ClaudeCodeTerminal(widget, content)
-        }.firstOrNull()
+        }.toList()
+        terminals.firstOrNull { it.content.getUserData(CLAUDE_CODE_TERMINAL_KEY) == true }
+            ?: terminals.firstOrNull()
     } catch (t: Throwable) {
         logger.warn("Failed to inspect existing terminal widgets", t)
         null
@@ -171,6 +185,7 @@ class ClaudeCodeTerminalManager(private val project: Project) {
         content.putUserData(CLAUDE_CODE_TERMINAL_KEY, null)
         content.putUserData(CLAUDE_CODE_TERMINAL_RUNNING_KEY, null)
         content.putUserData(CLAUDE_CODE_TERMINAL_CALLBACK_KEY, null)
+        content.putUserData(CLAUDE_CODE_TERMINAL_SHELL_KEY, null)
     }
 
     private fun reuseClaudeCodeTerminal(terminal: ClaudeCodeTerminal, command: String): Boolean {
@@ -263,62 +278,34 @@ class ClaudeCodeTerminalManager(private val project: Project) {
 }
 
 object ShellLaunchCommandBuilder {
-    fun wrap(command: String, baseDir: String, state: ClaudeCodeLauncherSettings.State): String =
+    fun shellIdentity(state: ClaudeCodeLauncherSettings.State): String =
+        shellCommand(state)?.joinToString("\u0000") ?: "ide-default"
+
+    fun shellCommand(state: ClaudeCodeLauncherSettings.State): List<String>? =
         when (state.launchShellMode) {
-            LaunchShellMode.FOLLOW_IDE_DEFAULT -> command
-            LaunchShellMode.POWERSHELL -> buildPowerShellCommand(command, baseDir, state)
-            LaunchShellMode.WSL -> buildWslCommand(command, baseDir, state)
+            LaunchShellMode.FOLLOW_IDE_DEFAULT -> null
+            LaunchShellMode.POWERSHELL -> buildPowerShellShellCommand(state)
+            LaunchShellMode.WSL -> buildWslShellCommand(state)
         }
 
-    private fun buildPowerShellCommand(
-        command: String,
-        baseDir: String,
+    private fun buildPowerShellShellCommand(
         state: ClaudeCodeLauncherSettings.State,
-    ): String {
+    ): List<String> {
         val executable = state.powerShellExecutablePath.trim().ifEmpty {
             state.powerShellVersion.defaultExecutable()
         }
-        val psCommand = "Set-Location -LiteralPath ${quoteForPowerShell(baseDir)}; $command"
-        return "$executable -NoLogo -NoExit -ExecutionPolicy Bypass -Command ${quoteForDoubleQuotedArgument(psCommand)}"
+        return listOf(executable, "-NoLogo", "-NoExit", "-ExecutionPolicy", "Bypass")
     }
 
-    private fun buildWslCommand(
-        command: String,
-        baseDir: String,
-        state: ClaudeCodeLauncherSettings.State,
-    ): String {
+    private fun buildWslShellCommand(state: ClaudeCodeLauncherSettings.State): List<String> {
         val executable = state.wslExecutablePath.trim().ifEmpty { "wsl.exe" }
-        val distro = state.wslDistro.trim()
-        val wslDir = toWslPath(baseDir)
-        val shellCommand = "cd ${quoteForPosix(wslDir)}; $command; exec bash -l"
-        return buildString {
-            append(executable)
+        val distro = state.wslDistro.trim().ifEmpty { "Ubuntu" }
+        return buildList {
+            add(executable)
             if (distro.isNotEmpty()) {
-                append(" -d ")
-                append(quoteForCurrentHostShell(distro))
+                add("-d")
+                add(distro)
             }
-            append(" --exec bash -lc ")
-            append(quoteForCurrentHostShell(shellCommand))
         }
-    }
-
-    private fun quoteForCurrentHostShell(value: String): String =
-        if (SystemInfo.isWindows) quoteForPowerShell(value) else quoteForPosix(value)
-
-    private fun quoteForPowerShell(value: String): String = "'" + value.replace("'", "''") + "'"
-
-    private fun quoteForPosix(value: String): String = "'" + value.replace("'", "'\"'\"'") + "'"
-
-    private fun quoteForDoubleQuotedArgument(value: String): String =
-        "\"" + value.replace("`", "``").replace("\"", "`\"").replace("\$", "`\$") + "\""
-
-    private fun toWslPath(path: String): String {
-        val drivePath = Regex("^([A-Za-z]):[\\\\/](.*)$").matchEntire(path)
-        if (drivePath != null) {
-            val drive = drivePath.groupValues[1].lowercase()
-            val rest = drivePath.groupValues[2].replace('\\', '/')
-            return "/mnt/$drive/$rest"
-        }
-        return path.replace('\\', '/')
     }
 }

@@ -38,7 +38,7 @@ class ClaudeCodeLauncherSettings : PersistentStateComponent<ClaudeCodeLauncherSe
         var powerShellVersion: PowerShellVersion = PowerShellVersion.POWERSHELL_LT_73,
         var powerShellExecutablePath: String = "",
         var wslExecutablePath: String = "",
-        var wslDistro: String = "",
+        var wslDistro: String = "Ubuntu",
     )
 
     private var state = State()
