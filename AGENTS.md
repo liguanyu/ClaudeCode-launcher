@@ -1,21 +1,21 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `src/main/kotlin/com/github/x0x0b/codexlauncher/` — plugin actions (`*Action`), terminal service, CLI arg builder, settings UI/options.
+- `src/main/kotlin/com/github/liguanyu/claudecodelauncher/` — plugin actions (`*Action`), terminal service, CLI arg builder, settings UI/options.
 - `src/main/resources/META-INF/plugin.xml` — plugin metadata; icons live in `src/main/resources/icons/`.
-- `src/test/kotlin/com/github/x0x0b/codexlauncher/` — JUnit tests mirroring main packages (e.g., `CodexArgsBuilderTest`, `InsertPayloadResolverTest`).
+- `src/test/kotlin/com/github/liguanyu/claudecodelauncher/` — JUnit tests mirroring main packages (e.g., `ClaudeCodeArgsBuilderTest`, `InsertPayloadResolverTest`).
 - Build outputs land in `build/`; packaged zips in `build/distributions/`.
 
 ## Build, Test, and Development Commands
 - `./gradlew buildPlugin` — compile and package the IntelliJ plugin zip into `build/distributions/`.
 - `./gradlew runIde` — launch the sandbox IDE with the plugin for manual checks.
-- `./gradlew test` — run the JUnit suite; use `--tests com.github.x0x0b.codexlauncher.*` to target classes.
+- `./gradlew test` — run the JUnit suite; use `--tests com.github.liguanyu.claudecodelauncher.*` to target classes.
 - `./gradlew clean` — remove build outputs before a fresh run (optional).
 
 ## Coding Style & Naming Conventions
 - Kotlin 2.2, JVM 21; follow standard Kotlin style (4-space indent, trailing commas where helpful, immutable vals preferred).
 - Public APIs and services should include concise KDoc; logger via `com.intellij.openapi.diagnostic.logger`.
-- Classes/objects use PascalCase; enums like `Model`, `Mode`; actions end with `Action`; tests end with `Test`.
+- Classes/objects use PascalCase; enums like `Model`, `PermissionMode`; actions end with `Action`; tests end with `Test`.
 - Keep IntelliJ platform threading rules in mind (UI changes on EDT; services stay light).
 
 ## Testing Guidelines
@@ -31,4 +31,4 @@
 
 ## Security & Configuration Tips
 - Keep signing/publish secrets out of the repo; set `PUBLISH_TOKEN`, `CERTIFICATE_CHAIN`, `PRIVATE_KEY`, and `PRIVATE_KEY_PASSWORD` as environment variables when building for release.
-- The plugin shells out to the Codex CLI; ensure `codex` is on PATH in the sandbox IDE and verify shell compatibility on Windows via plugin settings.
+- The plugin shells out to the Claude Code CLI; ensure `claude` is on PATH in the sandbox IDE and verify shell compatibility on Windows via plugin settings.

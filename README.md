@@ -1,60 +1,54 @@
-# Codex Launcher - IntelliJ Plugin
+# ClaudeCode-launcher - IntelliJ Plugin
 
-[![Version](https://img.shields.io/badge/version-1.1.16-blue.svg)](https://github.com/x0x0b/codex-launcher/releases)
 [![IntelliJ IDEA](https://img.shields.io/badge/IntelliJ%20IDEA-2024.2+-orange.svg)](https://www.jetbrains.com/idea/)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/x0x0b/codex-launcher)
 
-> [!IMPORTANT]
-> Codex is now officially integrated into JetBrains IDEs.
-> Install the official integration: https://developers.openai.com/codex/ide/#jetbrains-ide-integration.
->
-> With an official integration now available, this plugin is expected to transition to maintenance-only mode.
+ClaudeCode-launcher is an unofficial IntelliJ IDEA plugin that keeps the Claude Code CLI one click away inside the IDE.
 
-<img width="800" alt="The screenshot of Codex Launcher." src="https://github.com/user-attachments/assets/4ee3fbd8-e384-4672-94c6-e4e9041a8e0d" />
+> **Important:** Install the [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code/overview) separately before using this plugin.
 
-Codex Launcher is an **unofficial** IntelliJ IDEA plugin that keeps the OpenAI Codex CLI one click away inside the IDE.
+> **For Windows users:** Select the launch shell in _Settings (-> Other Settings) -> ClaudeCode-launcher_ when you need to force PowerShell or WSL instead of following the IDE terminal default.
 
-> **Important:** Install the [OpenAI Codex CLI](https://github.com/openai/codex) separately before using this plugin.
+## Features
 
-> **For Windows users:** Please select your terminal shell in the plugin settings to ensure proper functionality. Go to _Settings (→ Other Settings) → Codex Launcher_.
+- One-click launch from the toolbar or Tools menu.
+- Integrated terminal that opens a dedicated "Claude Code" tab in the project root.
+- Current-file and selection/class range insertion into the active Claude Code terminal.
+- Claude Code completion hooks for IDE notifications, VFS refresh, and automatic opening of recently changed files.
+- Claude CLI options for model, effort, permission mode, add-dir, tools, MCP config, settings, and custom arguments.
+- Explicit launch shell options for following the IDE default, PowerShell, or WSL.
 
-## ✨ Features
+## Requirements
 
-- **One-click launch** from the toolbar or Tools menu
-- **Integrated terminal** that opens a dedicated "Codex" tab in the project root
-- **Completion notifications** after Codex CLI finishes processing the current run
-- **Automatic file opening** for files updated by Codex
-- **Built-in MCP server pairing** with guided setup for IntelliJ's MCP server (2025.2+)
-- **Flexible configuration** for launch modes, models, and notifications
+- IntelliJ IDEA 2024.2 or later, or another compatible JetBrains IDE.
+- Claude Code CLI installed and available as `claude` in the selected shell PATH.
 
-## 🛠️ Installation
+## Usage
 
-### Prerequisites
-- IntelliJ IDEA 2024.2 or later (or other compatible JetBrains IDEs)
-- OpenAI Codex CLI installed and available in your system PATH
+1. Click **Launch Claude Code** in the main toolbar, or choose **Tools** -> **Launch Claude Code**.
+2. The integrated terminal opens a "Claude Code" tab and runs `claude`.
+3. When the Claude Code tab is active, click the toolbar action again to insert the current file path.
+4. In an editor, use **Send Selection/Class to Claude Code** to insert `path:start-end ` for the current selection or enclosing class.
 
-### Installation
-[![Install Plugin](https://img.shields.io/badge/Install%20Plugin-JetBrains-orange?style=for-the-badge&logo=jetbrains&logoColor=white)](https://plugins.jetbrains.com/plugin/28264-codex-launcher)
+## Configuration
 
-## 🚀 Usage
+Open **Settings (-> Other Settings) -> ClaudeCode-launcher** to configure:
 
-### Quick Start
-1. Click the **Launch Codex** button in the main toolbar.
-2. Or choose **Tools** → **Launch Codex**.
-3. The integrated terminal opens a new "Codex" tab and runs `codex` automatically.
+- Launch shell: follow IDE default, PowerShell, or WSL.
+- PowerShell version and optional executable path.
+- Optional WSL executable path and distro.
+- Claude model, effort, permission mode, add-dir paths, tool allow/deny lists, MCP config, settings file, and custom arguments.
+- Notifications and automatic file opening through Claude Code `Stop` and `StopFailure` hooks.
 
-### Configuration
-Open **Settings (→ Other Settings) → Codex Launcher** to pick the launch mode, model, notification behavior, and auto-open options.
+## Development
 
-## 📝 Development
-
-### Building from Source
 ```bash
-git clone https://github.com/x0x0b/codex-launcher.git
-cd codex-launcher
+./gradlew test
 ./gradlew buildPlugin
+./gradlew runIde
 ```
 
-## 📄 License
+Packaged plugin zips are written to `build/distributions/`.
+
+## License
 
 This project is licensed under the terms specified in the [LICENSE](LICENSE) file.

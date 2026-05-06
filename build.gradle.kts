@@ -4,7 +4,7 @@ plugins {
     id("org.jetbrains.intellij.platform") version "2.12.0"
 }
 
-group = "com.github.x0x0b"
+group = "com.github.liguanyu"
 version = "1.1.16"
 
 repositories {
@@ -36,7 +36,7 @@ intellijPlatform {
         }
 
         changeNotes = """
-            Add support for GPT-5.5 model.
+            Initial Claude Code launcher migration.
         """.trimIndent()
     }
     publishing {
