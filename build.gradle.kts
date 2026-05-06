@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.liguanyu"
-version = "1.1.16"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
